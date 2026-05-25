@@ -1,48 +1,46 @@
 async function searchDeals() {
-  const searchInput = document.getElementById('search');
-  const dealsContainer = document.getElementById('deals');
+  const q = document.getElementById('search')?.value || 'Milwaukee M18 near Westborough MA';
 
-  const query = searchInput?.value || 'Milwaukee M18';
+  const trustedStores = [
+    'Home Depot', 'Lowe', 'Amazon', 'Grainger', 'SupplyHouse',
+    'Zoro', 'Ace Hardware', 'Acme Tools', 'Walmart'
+  ];
 
-  dealsContainer.innerHTML = '<p>Searching real deals...</p>';
+  const box = document.getElementById('deals');
+  box.innerHTML = '<p>Searching trusted deals...</p>';
 
-  try {
-    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-    const data = await response.json();
+  const res = await fetch(`/api/search?q=${encodeURIComponent(q + ' near Westborough MA')}`);
+  const data = await res.json();
 
-    const results = data.shopping_results || [];
+  let results = data.shopping_results || [];
 
-    if (!results.length) {
-      dealsContainer.innerHTML = '<p>No real deals found. Try another search.</p>';
-      return;
-    }
+  results = results.filter(item =>
+    trustedStores.some(store =>
+      (item.source || '').toLowerCase().includes(store.toLowerCase())
+    )
+  );
 
-    dealsContainer.innerHTML = results.slice(0, 20).map(item => `
-      <div class="deal-card">
-        <h3>${item.title || 'No title'}</h3>
-        <p><strong>Store:</strong> ${item.source || 'Unknown'}</p>
-        <p><strong>Price:</strong> ${item.price || 'N/A'}</p>
-        <a href="${item.link || item.product_link || '#'}" target="_blank" rel="noopener">
-          Open Deal
-        </a>
-      </div>
-    `).join('');
-  } catch (error) {
-    dealsContainer.innerHTML = '<p>Error loading deals.</p>';
+  if (!results.length) {
+    box.innerHTML = '<p>No trusted local/online deals found. Try another search.</p>';
+    return;
   }
+
+  box.innerHTML = results.slice(0, 20).map(item => `
+    <div class="deal-card">
+      <h3>${item.title || ''}</h3>
+      <p><strong>Store:</strong> ${item.source || 'Unknown'}</p>
+      <p><strong>Price:</strong> ${item.price || 'N/A'}</p>
+      <a href="${item.link || item.product_link || '#'}" target="_blank">Open Deal</a>
+    </div>
+  `).join('');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const searchInput = document.getElementById('search');
-  const searchBtn = document.getElementById('searchBtn');
-
-  if (searchBtn) searchBtn.addEventListener('click', searchDeals);
-
-  if (searchInput) {
-    searchInput.addEventListener('keydown', (e) => {
+  const search = document.getElementById('search');
+  if (search) {
+    search.addEventListener('keydown', e => {
       if (e.key === 'Enter') searchDeals();
     });
   }
-
   searchDeals();
 });
