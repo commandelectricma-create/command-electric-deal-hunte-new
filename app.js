@@ -1,0 +1,24 @@
+const rules={"Tools":35,"Batteries":35,"Breakers":25,"GFCI/AFCI":25,"Wire/Cable":20,"Connectors":20,"Bath Fans":30,"Ceiling Fans":30,"Lighting":30,"Supplies":25};
+const deals=[
+{product:"Milwaukee M18 FUEL Hammer Drill / Impact Combo Kit",store:"Home Depot",category:"Tools",brand:"Milwaukee",normalPrice:399,dealPrice:229,stock:"In stock",reason:"High-demand tool kit for daily electrical work."},
+{product:"Square D QO 20 Amp Single-Pole AFCI Breaker",store:"Lowe’s",category:"Breakers",brand:"Square D",normalPrice:62,dealPrice:38,stock:"Limited stock",reason:"Useful breaker type. Buy only if compatible with your panels."},
+{product:"DeWalt 20V MAX 5.0Ah Battery 2-Pack",store:"Amazon",category:"Batteries",brand:"DeWalt",normalPrice:199,dealPrice:119,stock:"Online only",reason:"Battery deals are usually worth grabbing when the discount is deep."},
+{product:"Panasonic WhisperCeiling Bathroom Exhaust Fan",store:"Home Depot",category:"Bath Fans",brand:"Panasonic",normalPrice:169,dealPrice:109,stock:"In stock",reason:"Good remodel/service-call item."},
+{product:"Leviton 20 Amp Weather Resistant GFCI Outlet 10-Pack",store:"Amazon",category:"GFCI/AFCI",brand:"Leviton",normalPrice:139,dealPrice:92,stock:"In stock",reason:"Good stock item for service calls and remodel work."},
+{product:"Klein Tools Impact Rated Driver Bit Set",store:"Lowe’s",category:"Tools",brand:"Klein",normalPrice:39,dealPrice:24,stock:"In stock",reason:"Useful small item. Good add-on purchase."},
+{product:"12/2 NM-B Romex 250 ft Coil",store:"SupplyHouse",category:"Wire/Cable",brand:"Southwire",normalPrice:128,dealPrice:103,stock:"In stock",reason:"Wire discounts are usually smaller, so 20% off is meaningful."},
+{product:"Arlington NM Cable Connector Assortment",store:"Zoro",category:"Connectors",brand:"Arlington",normalPrice:56,dealPrice:39,stock:"Online only",reason:"Good inventory item for rough-in jobs and service work."}
+];
+function money(n){return n.toLocaleString("en-US",{style:"currency",currency:"USD"})}
+function discount(d){return Math.round(((d.normalPrice-d.dealPrice)/d.normalPrice)*100)}
+function score(d){const disc=discount(d),rule=rules[d.category]||30,bonus=["Milwaukee","DeWalt","Klein","Fluke","Southwire","Leviton","Square D","Eaton","Siemens","Panasonic"].includes(d.brand)?8:0,stock=d.stock.toLowerCase().includes("in stock")?5:0;return Math.min(100,Math.max(1,65+Math.max(0,disc-rule)*2+bonus+stock))}
+function priority(s){return s>=90?"Strong Buy":s>=80?"Buy":s>=70?"Watch":"Skip"}
+const storeSel=document.getElementById("store"),categorySel=document.getElementById("category"),brandSel=document.getElementById("brand"),scoreSel=document.getElementById("score"),search=document.getElementById("search");
+function fill(el,vals){el.innerHTML=vals.map(v=>`<option value="${v}">${v}</option>`).join("")}
+fill(storeSel,["All",...new Set(deals.map(d=>d.store))]);fill(categorySel,["All",...Object.keys(rules)]);fill(brandSel,["All",...new Set(deals.map(d=>d.brand))]);
+document.getElementById("rules").innerHTML=Object.entries(rules).map(([k,v])=>`<div class="rule"><strong>${k}</strong><p>Show only ${v}%+ off</p></div>`).join("");
+function render(){const q=search.value.toLowerCase(),minScore=Number(scoreSel.value);const filtered=deals.map(d=>({...d,discount:discount(d),score:score(d),savings:d.normalPrice-d.dealPrice})).filter(d=>d.discount>=(rules[d.category]||30)).filter(d=>d.score>=minScore).filter(d=>storeSel.value==="All"||d.store===storeSel.value).filter(d=>categorySel.value==="All"||d.category===categorySel.value).filter(d=>brandSel.value==="All"||d.brand===brandSel.value).filter(d=>d.product.toLowerCase().includes(q)||d.brand.toLowerCase().includes(q)).sort((a,b)=>b.score-a.score);
+document.getElementById("dealCount").textContent=filtered.length;document.getElementById("bestScore").textContent=filtered[0]?filtered[0].score:"—";document.getElementById("savings").textContent=money(filtered.reduce((s,d)=>s+d.savings,0));
+const c=document.getElementById("deals");if(!filtered.length){c.innerHTML='<div class="empty"><h2>No deep deals match these filters.</h2><p>Lower the score or change filters to see more opportunities.</p></div>';return}
+c.innerHTML=filtered.map(d=>`<article class="deal"><div><div class="chips"><span class="chip">${d.store}</span><span class="chip">${d.category}</span><span class="chip">${d.brand}</span><span class="chip">${d.stock}</span></div><h3>${d.product}</h3><p>${d.reason}</p><p>Rule: appears only at ${(rules[d.category]||30)}%+ off. This deal is ${d.discount}% off.</p></div><div class="price"><div class="old">Normal ${money(d.normalPrice)}</div><div class="new">${money(d.dealPrice)}</div><div>Save ${money(d.savings)} · ${d.discount}% OFF</div><div class="score">${priority(d.score)} · ${d.score}/100</div></div></article>`).join("")}
+[storeSel,categorySel,brandSel,scoreSel,search].forEach(el=>el.addEventListener("input",render));render();
