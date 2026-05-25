@@ -1,39 +1,26 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Command Electric Deal Hunter</title>
-<link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command Electric Deal Hunter</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<main class="app">
-<header class="hero">
-<div>
-<p class="badge">Command Electric Private Dashboard</p>
-<h1>Command Electric Deal Hunter</h1>
-<p class="subtitle">Deep-deal dashboard for electrical supplies, tools, batteries, breakers, fans, GFCI/AFCI, cable, connectors and job-ready material.</p>
-</div>
-<div class="email-box"><span>Email alerts</span><strong>commandelectricma@gmail.com</strong></div>
-</header>
-<section class="stats">
-<div class="card"><span>Tracked stores</span><strong>7</strong><p>Home Depot, Lowe’s, Amazon + suppliers</p></div>
-<div class="card"><span>Deep deals found</span><strong id="dealCount">0</strong><p>Filtered by rules + score</p></div>
-<div class="card"><span>Best score</span><strong id="bestScore">—</strong><p>BUY NOW Score /100</p></div>
-<div class="card"><span>Visible savings</span><strong id="savings">$0</strong><p>Across visible deals</p></div>
-</section>
-<section class="filters card">
-<h2>Filters</h2>
-<div class="filter-grid">
-<input id="search" placeholder="Search breaker, Milwaukee, GFCI, Romex..." />
-<select id="store"></select><select id="category"></select><select id="brand"></select>
-<select id="score"><option value="70">Score 70+</option><option value="80">Score 80+</option><option value="90">Score 90+</option></select>
-</div>
-</section>
-<section class="card"><h2>Deep Deal Rules</h2><div id="rules" class="rules"></div></section>
-<section id="deals" class="deals"></section>
-<footer>Static MVP. No npm, no build step, no cron. Designed to deploy cleanly first. Live pricing/API connectors can be added after the dashboard is online.</footer>
-</main>
-<script src="app.js"></script>
+  <div class="container">
+    <header>
+      <h1>Command Electric Deal Hunter</h1>
+      <p>Find real clearance deals for electrical supplies, tools, breakers, wire, batteries and construction materials.</p>
+    </header>
+
+    <div class="filters">
+      <input id="search" type="text" placeholder="Search Milwaukee, breaker, Romex, GFCI...">
+      <button id="searchBtn">SEARCH DEALS</button>
+    </div>
+
+    <div id="deals"></div>
+  </div>
+
+  <script src="app.js"></script>
 </body>
 </html>
