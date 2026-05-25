@@ -1,28 +1,48 @@
 async function searchDeals() {
-  const query = document.getElementById('search').value || 'electrical supplies';
-
-  const response = await fetch(`https://serpapi.com/search.json?engine=google_shopping&q=${encodeURIComponent(query)}&api_key=${SERPAPI_API_KEY}`);
-  const data = await response.json();
-
+  const searchInput = document.getElementById('search');
   const dealsContainer = document.getElementById('deals');
-  dealsContainer.innerHTML = '';
 
-  if (!data.shopping_results) {
-    dealsContainer.innerHTML = '<p>No deals found.</p>';
-    return;
-  }
+  const query = searchInput?.value || 'Milwaukee M18';
 
-  data.shopping_results.slice(0, 20).forEach(item => {
-    dealsContainer.innerHTML += `
+  dealsContainer.innerHTML = '<p>Searching real deals...</p>';
+
+  try {
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const data = await response.json();
+
+    const results = data.shopping_results || [];
+
+    if (!results.length) {
+      dealsContainer.innerHTML = '<p>No real deals found. Try another search.</p>';
+      return;
+    }
+
+    dealsContainer.innerHTML = results.slice(0, 20).map(item => `
       <div class="deal-card">
-        <h3>${item.title}</h3>
-        <p><strong>Store:</strong> ${item.source}</p>
+        <h3>${item.title || 'No title'}</h3>
+        <p><strong>Store:</strong> ${item.source || 'Unknown'}</p>
         <p><strong>Price:</strong> ${item.price || 'N/A'}</p>
-        <a href="${item.link}" target="_blank">BUY NOW</a>
+        <a href="${item.link || item.product_link || '#'}" target="_blank" rel="noopener">
+          Open Deal
+        </a>
       </div>
-    `;
-  });
+    `).join('');
+  } catch (error) {
+    dealsContainer.innerHTML = '<p>Error loading deals.</p>';
+  }
 }
 
-document.getElementById('searchBtn').addEventListener('click', searchDeals);
-window.onload = searchDeals;
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('search');
+  const searchBtn = document.getElementById('searchBtn');
+
+  if (searchBtn) searchBtn.addEventListener('click', searchDeals);
+
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') searchDeals();
+    });
+  }
+
+  searchDeals();
+});
